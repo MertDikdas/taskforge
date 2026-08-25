@@ -1,0 +1,24 @@
+spring:
+  application:
+    name: worker-service
+
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/taskforge}
+    username: ${DB_USERNAME:taskforge}
+    password: ${DB_PASSWORD:taskforge}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+
+  rabbitmq:
+    host: ${RABBITMQ_HOST:localhost}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USERNAME:taskforge}
+    password: ${RABBITMQ_PASSWORD:taskforge}
+
+    listener:
+      simple:
+        acknowledge-mode: auto
+        prefetch: 1
+        concurrency: 1
