@@ -1,7 +1,7 @@
 package com.taskforge.api.job.dto;
 
-import com.taskforge.api.job.domain.JobPriority;
-import com.taskforge.api.job.domain.JobType;
+import com.taskforge.domain.job.JobPriority;
+import com.taskforge.domain.job.JobType;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;

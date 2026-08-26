@@ -1,4 +1,4 @@
-package com.taskforge.api.job.domain;
+package com.taskforge.domain.job;
 
 import jakarta.persistence.*;
 import org.hibernate.annotations.JdbcTypeCode;
@@ -43,6 +43,12 @@ public class Job {
     @Column(nullable = false)
     private Instant updatedAt;
 
+    @Column(name = "started_at")
+    private Instant startedAt;
+
+    @Column(name = "completed_at")
+    private Instant completedAt;
+
     protected Job(){
     }
 
@@ -63,6 +69,28 @@ public class Job {
         this.maxRetries = maxRetries;
         this.createdAt = createdAt;
         this.updatedAt = createdAt;
+    }
+
+    public void markRunning(Instant now){
+        if(status!=JobStatus.QUEUED){
+            throw new IllegalStateException("Job can only start from QUEUED state. Current state: "+ status);
+        }
+        status = JobStatus.RUNNING;
+        startedAt = now;
+        updatedAt = now;
+    }
+
+    public void markCompleted(Instant now) {
+
+        if (status != JobStatus.RUNNING) {
+            throw new IllegalStateException(
+                    "Job can only complete from RUNNING state. Current state: " + status
+            );
+        }
+
+        status = JobStatus.COMPLETED;
+        completedAt = now;
+        updatedAt = now;
     }
 
     public static Job queued(
@@ -107,5 +135,13 @@ public class Job {
 
     public Instant getUpdatedAt() {
         return updatedAt;
+    }
+
+    public Instant getStartedAt() {
+        return startedAt;
+    }
+
+    public Instant getCompletedAt() {
+        return completedAt;
     }
 }

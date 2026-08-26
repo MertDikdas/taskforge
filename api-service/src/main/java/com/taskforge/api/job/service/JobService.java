@@ -1,8 +1,8 @@
 package com.taskforge.api.job.service;
 
 import com.taskforge.api.common.exception.JobNotFoundException;
-import com.taskforge.api.job.domain.Job;
-import com.taskforge.api.job.domain.JobPriority;
+import com.taskforge.domain.job.Job;
+import com.taskforge.domain.job.JobPriority;
 import com.taskforge.api.job.dto.CreateJobRequest;
 import com.taskforge.api.job.dto.JobResponse;
 import com.taskforge.api.job.dto.PageResponse;

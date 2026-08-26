@@ -1,4 +1,4 @@
-package com.taskforge.api.job.domain;
+package com.taskforge.domain.job;
 
 public enum JobStatus {
     QUEUED,

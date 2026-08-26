@@ -7,6 +7,12 @@ spring:
     username: ${DB_USERNAME:taskforge}
     password: ${DB_PASSWORD:taskforge}
 
+  rabbitmq:
+    username: ${RABBITMQ_USERNAME:taskforge}
+    password: ${RABBITMQ_PASSWORD:taskforge}
+    host: ${RABBITMQ_HOST:localhost}
+    port: ${RABBITMQ_PORT:5672}
+
   jpa:
     hibernate:
       ddl-auto: validate

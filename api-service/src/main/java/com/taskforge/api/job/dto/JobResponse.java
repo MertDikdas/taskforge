@@ -1,8 +1,8 @@
 package com.taskforge.api.job.dto;
 
-import com.taskforge.api.job.domain.JobPriority;
-import com.taskforge.api.job.domain.JobStatus;
-import com.taskforge.api.job.domain.JobType;
+import com.taskforge.domain.job.JobPriority;
+import com.taskforge.domain.job.JobStatus;
+import com.taskforge.domain.job.JobType;
 
 import java.time.Instant;
 import java.util.Map;

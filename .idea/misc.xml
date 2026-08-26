@@ -5,6 +5,10 @@
     <option name="originalFiles">
       <list>
         <option value="$PROJECT_DIR$/api-service/pom.xml" />
+        <option value="$PROJECT_DIR$/worker-service/pom.xml" />
+        <option value="$PROJECT_DIR$/taskforge-contracts/pom.xml" />
+        <option value="$PROJECT_DIR$/taskforge-domain/pom.xml" />
+        <option value="$PROJECT_DIR$/pom.xml" />
       </list>
     </option>
   </component>
