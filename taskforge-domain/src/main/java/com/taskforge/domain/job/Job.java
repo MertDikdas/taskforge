@@ -93,6 +93,19 @@ public class Job {
         updatedAt = now;
     }
 
+    public void markFailed(Instant now) {
+
+        if (status != JobStatus.RUNNING) {
+            throw new IllegalStateException(
+                    "Job can only fail from RUNNING state. Current state: "
+                            + status
+            );
+        }
+
+        status = JobStatus.FAILED;
+        updatedAt = now;
+    }
+
     public static Job queued(
             JobType type,
             JobPriority priority,

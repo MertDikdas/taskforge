@@ -8,20 +8,6 @@ import org.springframework.context.annotation.Configuration;
 public class HandlerConfig {
 
     @Bean
-    public JobHandler pdfReportJobHandler() {
-        return new SimulatedJobHandler(
-                JobType.PDF_REPORT
-        );
-    }
-
-    @Bean
-    public JobHandler csvImportJobHandler() {
-        return new SimulatedJobHandler(
-                JobType.CSV_IMPORT
-        );
-    }
-
-    @Bean
     public JobHandler imageResizeJobHandler() {
         return new SimulatedJobHandler(
                 JobType.IMAGE_RESIZE

@@ -1,7 +1,7 @@
 package com.taskforge.worker.job.handler;
 
 import com.taskforge.domain.job.JobType;
-import com.taskforge.worker.job.service.JobExecution;
+import com.taskforge.worker.job.execution.JobExecution;
 
 public class SimulatedJobHandler implements JobHandler {
     private final JobType type;

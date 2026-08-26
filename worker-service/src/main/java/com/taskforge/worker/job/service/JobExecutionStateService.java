@@ -1,6 +1,7 @@
 package com.taskforge.worker.job.service;
 
 import com.taskforge.domain.job.Job;
+import com.taskforge.worker.job.execution.JobExecution;
 import com.taskforge.worker.job.repository.JobRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -37,5 +38,18 @@ public class JobExecutionStateService {
                 );
 
         job.markCompleted(Instant.now());
+    }
+
+    @Transactional
+    public void fail(UUID jobId) {
+
+        Job job = jobRepository.findById(jobId)
+                .orElseThrow(() ->
+                        new IllegalStateException(
+                                "Job not found: " + jobId
+                        )
+                );
+
+        job.markFailed(Instant.now());
     }
 }
