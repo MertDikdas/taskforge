@@ -79,7 +79,9 @@ public class JobService {
                 job.getRetryCount(),
                 job.getMaxRetries(),
                 job.getCreatedAt(),
-                job.getUpdatedAt()
+                job.getUpdatedAt(),
+                job.getLastError(),
+                job.getNextRetryAt()
         );
     }
 }

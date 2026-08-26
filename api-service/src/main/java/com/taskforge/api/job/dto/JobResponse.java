@@ -17,6 +17,8 @@ public record JobResponse(
         int retryCount,
         int maxRetries,
         Instant createdAt,
-        Instant updatedAt
+        Instant updatedAt,
+        String lastError,
+        Instant nextRetryAt
 ) {
 }

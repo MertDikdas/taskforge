@@ -1,6 +1,7 @@
 package com.taskforge.domain.job;
 
 import jakarta.persistence.*;
+import lombok.Getter;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
@@ -11,6 +12,7 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "jobs")
+@Getter
 public class Job {
     @Id
     private UUID id;
@@ -49,6 +51,12 @@ public class Job {
     @Column(name = "completed_at")
     private Instant completedAt;
 
+    @Column(name = "last_error")
+    private String lastError;
+
+    @Column(name = "next_retry_at")
+    private Instant nextRetryAt;
+
     protected Job(){
     }
 
@@ -71,12 +79,23 @@ public class Job {
         this.updatedAt = createdAt;
     }
 
-    public void markRunning(Instant now){
-        if(status!=JobStatus.QUEUED){
-            throw new IllegalStateException("Job can only start from QUEUED state. Current state: "+ status);
+    public void markRunning(Instant now) {
+
+        if (status != JobStatus.QUEUED
+                && status != JobStatus.RETRYING) {
+            throw new IllegalStateException(
+                    "Job cannot start from state: " + status
+            );
         }
+
         status = JobStatus.RUNNING;
-        startedAt = now;
+
+        if (startedAt == null) {
+            startedAt = now;
+        }
+
+        nextRetryAt = null;
+
         updatedAt = now;
     }
 
@@ -106,6 +125,45 @@ public class Job {
         updatedAt = now;
     }
 
+    public void markRetrying(
+            Instant now,
+            String error,
+            Instant nextRetryAt
+    ) {
+
+        if (status != JobStatus.RUNNING) {
+            throw new IllegalStateException(
+                    "Job can only retry from RUNNING state. Current state: "
+                            + status
+            );
+        }
+
+        retryCount++;
+        status = JobStatus.RETRYING;
+        lastError = error;
+        this.nextRetryAt = nextRetryAt;
+        updatedAt = now;
+    }
+
+
+    public void markDeadLetter(
+            Instant now,
+            String error
+    ) {
+
+        if (status != JobStatus.RUNNING
+                && status != JobStatus.RETRYING) {
+            throw new IllegalStateException(
+                    "Job cannot move to DEAD_LETTER from state: "
+                            + status
+            );
+        }
+
+        status = JobStatus.DEAD_LETTER;
+        lastError = error;
+        nextRetryAt = null;
+        updatedAt = now;
+    }
     public static Job queued(
             JobType type,
             JobPriority priority,
@@ -113,48 +171,5 @@ public class Job {
             int maxRetries
     ){
         return new Job(UUID.randomUUID(), type, priority, payload, maxRetries, Instant.now());
-    }
-    public UUID getId() {
-        return id;
-    }
-
-    public JobType getType() {
-        return type;
-    }
-
-    public JobStatus getStatus() {
-        return status;
-    }
-
-    public JobPriority getPriority() {
-        return priority;
-    }
-
-    public Map<String, Object> getPayload() {
-        return Map.copyOf(payload);
-    }
-
-    public int getRetryCount() {
-        return retryCount;
-    }
-
-    public int getMaxRetries() {
-        return maxRetries;
-    }
-
-    public Instant getCreatedAt() {
-        return createdAt;
-    }
-
-    public Instant getUpdatedAt() {
-        return updatedAt;
-    }
-
-    public Instant getStartedAt() {
-        return startedAt;
-    }
-
-    public Instant getCompletedAt() {
-        return completedAt;
     }
 }

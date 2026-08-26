@@ -16,10 +16,19 @@ public class RabbitTopologyConfig {
                 false
         );
     }
+
     @Bean
     public Queue jobsQueue() {
         return QueueBuilder
                 .durable(JobMessagingContract.WORKER_QUEUE)
+                .withArgument(
+                        "x-dead-letter-exchange",
+                        JobMessagingContract.EXCHANGE
+                )
+                .withArgument(
+                        "x-dead-letter-routing-key",
+                        JobMessagingContract.DEAD_LETTER_ROUTING_KEY
+                )
                 .build();
     }
 

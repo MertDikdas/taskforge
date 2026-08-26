@@ -22,3 +22,4 @@ spring:
         acknowledge-mode: auto
         prefetch: 1
         concurrency: 1
+        default-requeue-rejected: false

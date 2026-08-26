@@ -5,6 +5,7 @@ import com.taskforge.worker.job.execution.JobExecution;
 import com.taskforge.worker.job.handler.JobHandler;
 import com.taskforge.worker.job.handler.JobHandlerRegistry;
 import com.taskforge.worker.job.service.JobExecutionStateService;
+import com.taskforge.worker.job.service.JobRetryService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
@@ -19,6 +20,7 @@ public class JobMessageListener {
 
     private final JobExecutionStateService stateService;
     private final JobHandlerRegistry handlerRegistry;
+    private final JobRetryService retryService;
 
     @RabbitListener(
             queues = JobMessagingContract.WORKER_QUEUE
@@ -27,9 +29,11 @@ public class JobMessageListener {
 
         UUID jobId = UUID.fromString(jobIdValue);
 
-        JobExecution job = stateService.start(jobId);
+        JobExecution job =
+                stateService.start(jobId);
 
         try {
+
             JobHandler handler =
                     handlerRegistry.get(job.type());
 
@@ -44,11 +48,9 @@ public class JobMessageListener {
 
         } catch (Exception exception) {
 
-            stateService.fail(jobId);
-
-            log.error(
-                    "Job {} failed during execution",
+            retryService.handleFailure(
                     jobId,
+                    job.retryCount(),
                     exception
             );
         }

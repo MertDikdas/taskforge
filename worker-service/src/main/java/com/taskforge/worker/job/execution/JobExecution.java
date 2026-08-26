@@ -8,6 +8,8 @@ import java.util.UUID;
 public record JobExecution(
         UUID id,
         JobType type,
-        Map<String, Object> payload
+        Map<String, Object> payload,
+        int retryCount,
+        int maxRetries
 ) {
 }

@@ -1,6 +1,8 @@
 package com.taskforge.worker.job.handler;
 
 import com.taskforge.domain.job.JobType;
+import com.taskforge.worker.job.exception.NonRetryableJobException;
+import com.taskforge.worker.job.exception.RetryableJobException;
 import com.taskforge.worker.job.execution.JobExecution;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.pdfbox.pdmodel.PDDocument;
@@ -11,6 +13,7 @@ import org.apache.pdfbox.pdmodel.font.Standard14Fonts;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Instant;
@@ -59,8 +62,16 @@ public class PdfReportJobHandler implements JobHandler {
                     outputPath.toAbsolutePath()
             );
 
+        }catch (FileAlreadyExistsException exception) {
+
+            throw new NonRetryableJobException(
+                    "Output path is not a directory for job " + job.id(),
+                    exception
+            );
+
         } catch (IOException exception) {
-            throw new IllegalStateException(
+
+            throw new RetryableJobException(
                     "Failed to generate PDF for job " + job.id(),
                     exception
             );
@@ -121,6 +132,19 @@ public class PdfReportJobHandler implements JobHandler {
                 );
 
                 content.endText();
+            }catch (FileAlreadyExistsException exception) {
+
+                throw new NonRetryableJobException(
+                        "Output path is not a directory for job " + job.id(),
+                        exception
+                );
+
+            } catch (IOException exception) {
+
+                throw new RetryableJobException(
+                        "Failed to generate PDF for job " + job.id(),
+                        exception
+                );
             }
 
             document.save(outputPath.toFile());
