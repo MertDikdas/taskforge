@@ -2,3 +2,4 @@ com/taskforge/domain/job/Job.class
 com/taskforge/domain/job/JobPriority.class
 com/taskforge/domain/job/JobStatus.class
 com/taskforge/domain/job/JobType.class
+com/taskforge/domain/job/exception/InvalidJobStateException.class

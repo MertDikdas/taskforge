@@ -1,5 +1,6 @@
 package com.taskforge.domain.job;
 
+import com.taskforge.domain.job.exception.InvalidJobStateException;
 import jakarta.persistence.*;
 import lombok.Getter;
 import org.hibernate.annotations.JdbcTypeCode;
@@ -78,7 +79,22 @@ public class Job {
         this.createdAt = createdAt;
         this.updatedAt = createdAt;
     }
+    public void resetForManualRetry(Instant now) {
 
+        if (status != JobStatus.DEAD_LETTER
+                && status != JobStatus.FAILED) {
+
+            throw new InvalidJobStateException(
+                    "Job cannot be manually retried from state: " + status
+            );
+        }
+
+        status = JobStatus.QUEUED;
+        retryCount = 0;
+        nextRetryAt = null;
+        completedAt = null;
+        updatedAt = now;
+    }
     public void markRunning(Instant now) {
 
         if (status != JobStatus.QUEUED

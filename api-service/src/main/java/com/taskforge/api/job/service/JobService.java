@@ -7,12 +7,16 @@ import com.taskforge.api.job.dto.CreateJobRequest;
 import com.taskforge.api.job.dto.JobResponse;
 import com.taskforge.api.job.dto.PageResponse;
 import com.taskforge.api.job.repository.JobRepository;
+import com.taskforge.domain.job.JobStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -68,6 +72,25 @@ public class JobService {
         return PageResponse.from(result);
 
     }
+
+    @Transactional
+    public JobResponse resetForManuelRetry(UUID id){
+        Job job = jobRepository.findById(id).orElseThrow(()->new JobNotFoundException(id));
+        job.resetForManualRetry(Instant.now());
+        return toResponse(job);
+    }
+
+    @Transactional
+    public PageResponse<JobResponse> getDeadLetterJobs(
+            Pageable pageable
+    ){
+        Page<JobResponse> jobs =
+                jobRepository.findAllByStatus(JobStatus.DEAD_LETTER, pageable).map(this::toResponse);
+
+        return PageResponse.from(jobs);
+
+    }
+
 
     private JobResponse toResponse(Job job) {
         return new JobResponse(
