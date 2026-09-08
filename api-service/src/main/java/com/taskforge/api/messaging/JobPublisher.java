@@ -1,5 +1,7 @@
 package com.taskforge.api.messaging;
 
+import com.taskforge.api.messaging.outbox.OutboxMessage;
+import com.taskforge.api.messaging.outbox.OutboxService;
 import com.taskforge.contracts.messaging.JobMessagingContract;
 import lombok.RequiredArgsConstructor;
 import org.springframework.amqp.core.MessageDeliveryMode;
@@ -13,11 +15,11 @@ import java.util.UUID;
 public class JobPublisher {
     private final RabbitTemplate rabbitTemplate;
 
-    public void publish(UUID jobId){
+    public void publish(String routingKey, String payload) {
         rabbitTemplate.convertAndSend(
                 JobMessagingContract.EXCHANGE,
-                JobMessagingContract.EXECUTE_ROUTING_KEY,
-                jobId.toString(),
+                routingKey,
+                payload,
                 message -> {
                     message.getMessageProperties()
                             .setDeliveryMode(
@@ -25,7 +27,6 @@ public class JobPublisher {
                             );
                     return message;
                 }
-
         );
     }
 }
