@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -18,20 +19,25 @@ public class JobExecutionStateService {
     private final JobRepository jobRepository;
 
     @Transactional
-    public JobExecution start(UUID jobId) {
-        Job job = jobRepository.findById(jobId)
+    public Optional<JobExecution> start(UUID jobId) {
+        Job job = jobRepository.findByIdForUpdate(jobId)
                 .orElseThrow(() ->
                         new IllegalStateException("Job not found: " + jobId)
                 );
-        job.markRunning(Instant.now());
 
-        return new JobExecution(
+        boolean claimed = job.tryMarkRunning(Instant.now());
+
+        if (!claimed) {
+            return Optional.empty();
+        }
+
+        return Optional.of(new JobExecution(
                 job.getId(),
                 job.getType(),
                 job.getPayload(),
                 job.getRetryCount(),
                 job.getMaxRetries()
-        );
+        ));
     }
 
     @Transactional

@@ -41,6 +41,7 @@ public class OutboxMessage {
 
     public void markPublished(){
         this.publishedAt = Instant.now();
+        this.lastError = null;
     }
 
     public void markFailed(String errorMessage){

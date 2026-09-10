@@ -11,7 +11,7 @@ import java.util.List;
 @Component
 @RequiredArgsConstructor
 public class OutboxPublisher {
-    private OutboxMessageRepository outboxMessageRepository;
+    private final OutboxMessageRepository outboxMessageRepository;
     private final JobPublisher jobPublisher;
 
     @Scheduled(fixedDelay = 1000)

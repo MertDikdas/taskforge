@@ -11,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
 
+import java.util.Optional;
 import java.util.UUID;
 
 @Component
@@ -29,30 +30,37 @@ public class JobMessageListener {
 
         UUID jobId = UUID.fromString(jobIdValue);
 
-        JobExecution job =
+        Optional<JobExecution> execution =
                 stateService.start(jobId);
 
+        if (execution.isEmpty()) {
+            log.info(
+                    "Ignoring duplicate/already claimed job message {}",
+                    jobId
+            );
+            return;
+        }
+
+        JobExecution job = execution.get();
         try {
 
             JobHandler handler =
                     handlerRegistry.get(job.type());
 
             handler.execute(job);
-
-            stateService.complete(jobId);
-
-            log.info(
-                    "Job {} completed successfully",
-                    jobId
-            );
-
         } catch (Exception exception) {
-
             retryService.handleFailure(
                     jobId,
                     job.retryCount(),
                     exception
             );
+            return;
         }
+        stateService.complete(jobId);
+
+        log.info(
+                "Job {} completed successfully",
+                jobId
+        );
     }
 }

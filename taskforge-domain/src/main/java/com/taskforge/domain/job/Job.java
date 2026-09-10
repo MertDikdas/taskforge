@@ -95,13 +95,12 @@ public class Job {
         completedAt = null;
         updatedAt = now;
     }
-    public void markRunning(Instant now) {
+
+    public boolean tryMarkRunning(Instant now) {
 
         if (status != JobStatus.QUEUED
                 && status != JobStatus.RETRYING) {
-            throw new IllegalStateException(
-                    "Job cannot start from state: " + status
-            );
+            return false;
         }
 
         status = JobStatus.RUNNING;
@@ -111,8 +110,9 @@ public class Job {
         }
 
         nextRetryAt = null;
-
         updatedAt = now;
+
+        return true;
     }
 
     public void markCompleted(Instant now) {
