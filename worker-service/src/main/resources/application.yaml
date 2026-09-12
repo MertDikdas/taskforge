@@ -23,3 +23,7 @@ spring:
         prefetch: 1
         concurrency: 1
         default-requeue-rejected: false
+
+taskforge:
+  worker:
+    id: ${WORKER_ID:${random.uuid}}

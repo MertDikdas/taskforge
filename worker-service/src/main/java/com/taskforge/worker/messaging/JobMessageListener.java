@@ -1,6 +1,7 @@
 package com.taskforge.worker.messaging;
 
 import com.taskforge.contracts.messaging.JobMessagingContract;
+import com.taskforge.worker.WorkerIdentity;
 import com.taskforge.worker.job.execution.JobExecution;
 import com.taskforge.worker.job.handler.JobHandler;
 import com.taskforge.worker.job.handler.JobHandlerRegistry;
@@ -19,6 +20,7 @@ import java.util.UUID;
 @Slf4j
 public class JobMessageListener {
 
+    private final WorkerIdentity workerIdentity;
     private final JobExecutionStateService stateService;
     private final JobHandlerRegistry handlerRegistry;
     private final JobRetryService retryService;
@@ -33,9 +35,15 @@ public class JobMessageListener {
         Optional<JobExecution> execution =
                 stateService.start(jobId);
 
+        log.info(
+                "Worker {} claimed job {}",
+                workerIdentity.getId(),
+                jobId
+        );
         if (execution.isEmpty()) {
             log.info(
-                    "Ignoring duplicate/already claimed job message {}",
+                    "Worker {} ignored duplicate/already claimed job {}",
+                    workerIdentity.getId(),
                     jobId
             );
             return;
