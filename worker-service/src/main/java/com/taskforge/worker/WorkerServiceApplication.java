@@ -5,6 +5,7 @@ import com.taskforge.worker.node.WorkerNode;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.persistence.autoconfigure.EntityScan;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 @SpringBootApplication
 @EntityScan(basePackageClasses =
@@ -13,6 +14,7 @@ import org.springframework.boot.persistence.autoconfigure.EntityScan;
                 WorkerNode.class
         }
 )
+@EnableScheduling
 public class WorkerServiceApplication {
 
 	public static void main(String[] args) {
