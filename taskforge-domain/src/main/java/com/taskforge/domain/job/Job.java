@@ -18,6 +18,9 @@ public class Job {
     @Id
     private UUID id;
 
+    @Column(name = "worker_id")
+    private String workerId;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 32)
     private JobType type;
@@ -93,10 +96,11 @@ public class Job {
         retryCount = 0;
         nextRetryAt = null;
         completedAt = null;
+        workerId = null;
         updatedAt = now;
     }
 
-    public boolean tryMarkRunning(Instant now) {
+    public boolean tryMarkRunning(Instant now, String workerId) {
 
         if (status != JobStatus.QUEUED
                 && status != JobStatus.RETRYING) {
@@ -111,6 +115,7 @@ public class Job {
 
         nextRetryAt = null;
         updatedAt = now;
+        this.workerId = workerId;
 
         return true;
     }
@@ -126,6 +131,7 @@ public class Job {
         status = JobStatus.COMPLETED;
         completedAt = now;
         updatedAt = now;
+        workerId = null;
     }
 
     public void markFailed(Instant now) {
@@ -138,6 +144,7 @@ public class Job {
         }
 
         status = JobStatus.FAILED;
+        workerId = null;
         updatedAt = now;
     }
 
@@ -158,6 +165,7 @@ public class Job {
         status = JobStatus.RETRYING;
         lastError = error;
         this.nextRetryAt = nextRetryAt;
+        workerId = null;
         updatedAt = now;
     }
 
@@ -178,6 +186,7 @@ public class Job {
         status = JobStatus.DEAD_LETTER;
         lastError = error;
         nextRetryAt = null;
+        workerId = null;
         updatedAt = now;
     }
     public static Job queued(

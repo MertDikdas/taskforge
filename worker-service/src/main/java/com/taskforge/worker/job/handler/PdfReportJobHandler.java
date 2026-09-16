@@ -33,7 +33,11 @@ public class PdfReportJobHandler implements JobHandler {
 
     @Override
     public void execute(JobExecution job) {
-
+        try {
+            Thread.sleep(50000);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
         Map<String, Object> payload = job.payload();
 
         String reportType =

@@ -1,6 +1,7 @@
 package com.taskforge.worker.job.service;
 
 import com.taskforge.domain.job.Job;
+import com.taskforge.worker.WorkerIdentity;
 import com.taskforge.worker.job.execution.JobExecution;
 import com.taskforge.worker.job.repository.JobRepository;
 import com.taskforge.worker.job.retry.RetrySchedule;
@@ -17,6 +18,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class JobExecutionStateService {
     private final JobRepository jobRepository;
+    private final WorkerIdentity workerIdentity;
 
     @Transactional
     public Optional<JobExecution> start(UUID jobId) {
@@ -25,7 +27,10 @@ public class JobExecutionStateService {
                         new IllegalStateException("Job not found: " + jobId)
                 );
 
-        boolean claimed = job.tryMarkRunning(Instant.now());
+        boolean claimed = job.tryMarkRunning(
+                Instant.now(),
+                workerIdentity.getId()
+        );
 
         if (!claimed) {
             return Optional.empty();
