@@ -2,6 +2,7 @@ package com.taskforge.worker.job.handler;
 
 import com.taskforge.domain.job.JobType;
 import com.taskforge.worker.job.execution.JobExecution;
+import com.taskforge.worker.job.execution.JobExecutionContext;
 
 public class SimulatedJobHandler implements JobHandler {
     private final JobType type;
@@ -16,8 +17,9 @@ public class SimulatedJobHandler implements JobHandler {
     }
 
     @Override
-    public void execute(JobExecution job) {
-
+    public void execute(JobExecutionContext jobExecutionContext) {
+        JobExecution job = jobExecutionContext.getJobExecution();
+        jobExecutionContext.checkCancellation();
         System.out.printf(
                 "Processing job %s of type %s%n",
                 job.id(),

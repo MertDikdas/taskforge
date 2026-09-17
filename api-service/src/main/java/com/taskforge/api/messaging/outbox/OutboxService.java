@@ -20,4 +20,13 @@ public class OutboxService {
 
         outboxMessageRepository.save(outboxMessage);
     }
+
+    public void enqueueJobCancellation(UUID jobId, String workerId){
+        OutboxMessage outboxMessage = new OutboxMessage(
+                jobId,
+                JobMessagingContract.cancelRoutingKey(workerId),
+                jobId.toString()
+        );
+        outboxMessageRepository.save(outboxMessage);
+    }
 }

@@ -1,6 +1,7 @@
 package com.taskforge.api.job.service;
 
 import com.taskforge.api.common.exception.JobNotFoundException;
+import com.taskforge.api.messaging.outbox.OutboxService;
 import com.taskforge.domain.job.Job;
 import com.taskforge.domain.job.JobPriority;
 import com.taskforge.api.job.dto.CreateJobRequest;
@@ -8,6 +9,7 @@ import com.taskforge.api.job.dto.JobResponse;
 import com.taskforge.api.job.dto.PageResponse;
 import com.taskforge.api.job.repository.JobRepository;
 import com.taskforge.domain.job.JobStatus;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -16,19 +18,17 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
-import java.util.List;
 import java.util.UUID;
 
 @Service
+@RequiredArgsConstructor
 public class JobService {
     private static final JobPriority DEFAULT_PRIORITY = JobPriority.NORMAL;
     private static final int DEFAULT_MAX_RETRIES = 3;
 
     private final JobRepository jobRepository;
+    private final OutboxService outboxService;
 
-    public JobService(JobRepository jobRepository) {
-        this.jobRepository = jobRepository;
-    }
 
     @Transactional
     public JobResponse create(CreateJobRequest request){
@@ -91,6 +91,17 @@ public class JobService {
 
     }
 
+    @Transactional
+    public JobResponse cancel(UUID id){
+        Job job = jobRepository.findByIdForUpdate(id).orElseThrow(()->new JobNotFoundException(id));
+        String workerId = job.getWorkerId();
+        job.cancel(Instant.now());
+
+        if(job.getStatus()==JobStatus.CANCEL_REQUESTED){
+            outboxService.enqueueJobCancellation(job.getId(), workerId);
+        }
+        return toResponse(job);
+    }
 
     private JobResponse toResponse(Job job) {
         return new JobResponse(

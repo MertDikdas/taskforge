@@ -4,6 +4,7 @@ import com.taskforge.domain.job.JobType;
 import com.taskforge.worker.job.exception.NonRetryableJobException;
 import com.taskforge.worker.job.exception.RetryableJobException;
 import com.taskforge.worker.job.execution.JobExecution;
+import com.taskforge.worker.job.execution.JobExecutionContext;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
@@ -32,12 +33,15 @@ public class PdfReportJobHandler implements JobHandler {
     }
 
     @Override
-    public void execute(JobExecution job) {
+    public void execute(JobExecutionContext jobExecutionContext) {
+
         try {
             Thread.sleep(50000);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }
+        JobExecution job = jobExecutionContext.getJobExecution();
+        jobExecutionContext.checkCancellation();
         Map<String, Object> payload = job.payload();
 
         String reportType =
@@ -47,6 +51,7 @@ public class PdfReportJobHandler implements JobHandler {
                 String.valueOf(payload.getOrDefault("userId", "UNKNOWN"));
 
         try {
+            jobExecutionContext.checkCancellation();
             Files.createDirectories(OUTPUT_DIRECTORY);
 
             Path outputPath = OUTPUT_DIRECTORY.resolve(

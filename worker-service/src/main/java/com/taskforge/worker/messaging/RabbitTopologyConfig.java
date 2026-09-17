@@ -1,6 +1,7 @@
 package com.taskforge.worker.messaging;
 
 import com.taskforge.contracts.messaging.JobMessagingContract;
+import com.taskforge.worker.WorkerIdentity;
 import org.springframework.amqp.core.*;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
@@ -87,6 +88,17 @@ public class RabbitTopologyConfig {
     }
 
     @Bean
+    public Queue workerCancelQueue(WorkerIdentity workerIdentity){
+        return QueueBuilder
+                .durable(
+                        JobMessagingContract.cancelQueueName(
+                                workerIdentity.getId()
+                        )
+                )
+                .build();
+    }
+
+    @Bean
     public Binding workerBinding(
             @Qualifier("workerQueue") Queue workerQueue,
             DirectExchange jobsExchange
@@ -136,4 +148,22 @@ public class RabbitTopologyConfig {
                 .to(jobsExchange)
                 .with(JobMessagingContract.DEAD_LETTER_ROUTING_KEY);
     }
+
+    @Bean
+    public Binding workerCancelBinding(
+            Queue workerCancelQueue,
+            DirectExchange jobsExchange,
+            WorkerIdentity workerIdentity
+    ){
+        return BindingBuilder
+                .bind(workerCancelQueue)
+                .to(jobsExchange)
+                .with(
+                        JobMessagingContract.cancelQueueName(
+                                workerIdentity.getId()
+                        )
+                );
+    }
+
+
 }

@@ -189,6 +189,42 @@ public class Job {
         workerId = null;
         updatedAt = now;
     }
+
+    public void cancel(Instant now){
+        if (status == JobStatus.QUEUED || status == JobStatus.RETRYING){
+
+            status = JobStatus.CANCELLED;
+            workerId = null;
+            updatedAt = now;
+            lastError = null;
+            nextRetryAt = null;
+            return;
+        }
+
+        if(status== JobStatus.RUNNING){
+            status = JobStatus.CANCEL_REQUESTED;
+            updatedAt = now;
+            return;
+        }
+
+
+        throw new InvalidJobStateException(
+                "Job cannot be cancelled from state: " + status
+        );
+    }
+    public void markCancelled(Instant now) {
+        if (status != JobStatus.CANCEL_REQUESTED) {
+            throw new IllegalStateException(
+                    "Job cannot be marked cancelled from state: " + status
+            );
+        }
+
+        status = JobStatus.CANCELLED;
+        workerId = null;
+        nextRetryAt = null;
+        lastError = null;
+        updatedAt = now;
+    }
     public static Job queued(
             JobType type,
             JobPriority priority,

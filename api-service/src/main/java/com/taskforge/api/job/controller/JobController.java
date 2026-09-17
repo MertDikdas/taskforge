@@ -95,6 +95,11 @@ public class JobController {
         return jobService.getAll(page, size);
     }
 
-
+    @PatchMapping("{id}/cancel")
+    public ResponseEntity<JobResponse> cancel(
+            @PathVariable UUID id
+    ) {
+        return ResponseEntity.ok(jobService.cancel(id));
+    }
 
 }

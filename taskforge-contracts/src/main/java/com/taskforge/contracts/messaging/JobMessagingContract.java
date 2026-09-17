@@ -38,4 +38,11 @@ public final class JobMessagingContract {
 
     public static final String RETRY_3_ROUTING_KEY =
             "job.retry.3";
+
+    public static String cancelRoutingKey (String workerId){
+        return "job."+workerId+".cancel";
+    }
+    public static String cancelQueueName(String workerId) {
+        return "taskforge.worker." + workerId + ".cancel";
+    }
 }

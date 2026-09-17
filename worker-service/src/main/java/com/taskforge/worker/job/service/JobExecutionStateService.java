@@ -1,6 +1,7 @@
 package com.taskforge.worker.job.service;
 
 import com.taskforge.domain.job.Job;
+import com.taskforge.domain.job.JobStatus;
 import com.taskforge.worker.WorkerIdentity;
 import com.taskforge.worker.job.execution.JobExecution;
 import com.taskforge.worker.job.repository.JobRepository;
@@ -47,12 +48,22 @@ public class JobExecutionStateService {
 
     @Transactional
     public void complete(UUID jobId) {
-        Job job = jobRepository.findById(jobId)
+
+        Job job = jobRepository.findByIdForUpdate(jobId)
                 .orElseThrow(() ->
-                        new IllegalStateException("Job not found: " + jobId)
+                        new IllegalStateException(
+                                "Job not found: " + jobId
+                        )
                 );
 
-        job.markCompleted(Instant.now());
+        Instant now = Instant.now();
+
+        if (job.getStatus() == JobStatus.CANCEL_REQUESTED) {
+            job.markCancelled(now);
+            return;
+        }
+
+        job.markCompleted(now);
     }
 
     @Transactional
@@ -104,6 +115,17 @@ public class JobExecutionStateService {
         );
     }
 
+    @Transactional
+    public void markCancelled(UUID jobId) {
+        Job job = jobRepository.findByIdForUpdate(jobId)
+                .orElseThrow(() ->
+                        new IllegalStateException(
+                                "Job not found: " + jobId
+                        )
+                );
+
+        job.markCancelled(Instant.now());
+    }
     private String truncateError(String error) {
 
         if (error == null) {

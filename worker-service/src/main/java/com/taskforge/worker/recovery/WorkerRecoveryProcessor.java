@@ -56,9 +56,12 @@ public class WorkerRecoveryProcessor {
         lockedWorker.markOffline();
 
         List<Job> jobs =
-                jobRepository.findByWorkerIdAndStatus(
+                jobRepository.findByWorkerIdAndStatusIn(
                         workerId,
-                        JobStatus.RUNNING
+                        List.of(
+                                JobStatus.RUNNING,
+                                JobStatus.CANCEL_REQUESTED
+                        )
                 );
 
         for (Job job : jobs) {
@@ -71,9 +74,7 @@ public class WorkerRecoveryProcessor {
                             )
                     );
 
-            if (lockedJob.getStatus() != JobStatus.RUNNING) {
-                continue;
-            }
+
 
             if (!workerId.equals(lockedJob.getWorkerId())) {
                 continue;
@@ -81,6 +82,16 @@ public class WorkerRecoveryProcessor {
 
             Instant now = Instant.now();
 
+            if (lockedJob.getStatus() == JobStatus.CANCEL_REQUESTED) {
+
+                lockedJob.markCancelled(now);
+
+                continue;
+            }
+
+            if (lockedJob.getStatus() != JobStatus.RUNNING) {
+                continue;
+            }
             int nextRetryNumber = lockedJob.getRetryCount() + 1;
 
             if (lockedJob.getRetryCount() >= lockedJob.getMaxRetries()) {

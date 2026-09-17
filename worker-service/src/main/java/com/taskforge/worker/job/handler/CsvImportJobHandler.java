@@ -2,6 +2,7 @@ package com.taskforge.worker.job.handler;
 
 import com.taskforge.domain.job.JobType;
 import com.taskforge.worker.job.execution.JobExecution;
+import com.taskforge.worker.job.execution.JobExecutionContext;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -20,8 +21,11 @@ public class CsvImportJobHandler implements JobHandler {
     }
 
     @Override
-    public void execute(JobExecution job) {
+    public void execute(JobExecutionContext jobExecutionContext) {
 
+        JobExecution job = jobExecutionContext.getJobExecution();
+
+        jobExecutionContext.checkCancellation();
         Object filePathValue = job.payload().get("filePath");
 
         if (filePathValue == null) {
@@ -39,7 +43,7 @@ public class CsvImportJobHandler implements JobHandler {
         }
 
         try (BufferedReader reader = Files.newBufferedReader(filePath)) {
-
+            jobExecutionContext.checkCancellation();
             String header = reader.readLine();
 
             if (header == null) {
@@ -53,6 +57,7 @@ public class CsvImportJobHandler implements JobHandler {
             String line;
 
             while ((line = reader.readLine()) != null) {
+                jobExecutionContext.checkCancellation();
 
                 if (line.isBlank()) {
                     continue;

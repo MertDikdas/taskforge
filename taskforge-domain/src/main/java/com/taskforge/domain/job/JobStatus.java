@@ -8,5 +8,6 @@ public enum JobStatus {
     RETRYING,
     DEAD_LETTER,
     CANCELLED,
+    CANCEL_REQUESTED,
     SCHEDULED
 }
